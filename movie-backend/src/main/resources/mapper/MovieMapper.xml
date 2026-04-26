@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movie.mapper.MovieMapper">
+
+    <resultMap type="com.movie.entity.Movie" id="BaseResultMap">
+        <id property="movieId" column="movie_id" javaType="java.lang.Long"/>
+        <result property="movieCnName" column="movie_cn_name" javaType="java.lang.String"/>
+        <result property="movieFgName" column="movie_fg_name" javaType="java.lang.String"/>
+        <result property="movieActor" column="movie_actor" javaType="java.lang.String"/>
+        <result property="movieDirector" column="movie_director" javaType="java.lang.String"/>
+        <result property="movieDetail" column="movie_detail" javaType="java.lang.String"/>
+        <result property="movieDuration" column="movie_duration" javaType="java.lang.String"/>
+        <result property="movieType" column="movie_type" javaType="java.lang.String"/>
+        <result property="movieScore" column="movie_score" javaType="java.lang.Float"/>
+        <result property="movieBoxOffice" column="movie_boxOffice" javaType="java.lang.Float"/>
+        <result property="movieCommentCount" column="movie_commentCount" javaType="java.lang.Long"/>
+        <result property="movieReleaseDate" column="movie_releaseDate" javaType="java.sql.Date"/>
+        <result property="movieCountry" column="movie_country" javaType="java.lang.String"/>
+        <result property="moviePicture" column="movie_picture" javaType="java.lang.String"/>
+        <result property="movieState" column="movie_state" javaType="java.lang.Integer"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        movie_id, movie_cn_name, movie_fg_name, movie_actor, movie_director, 
+        movie_detail, movie_duration, movie_type, movie_score, movie_boxOffice, 
+        movie_commentCount, movie_releaseDate, movie_country, movie_picture, movie_state
+    </sql>
+
+    <select id="findMovieById" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM movie 
+        WHERE movie_id = #{movieId}
+    </select>
+
+    <select id="findMovieByName" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM movie 
+        WHERE movie_cn_name = #{movieCnName}
+    </select>
+
+    <select id="findAllMovies" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM movie 
+        WHERE movie_state = #{movieState}
+        ORDER BY movie_releaseDate DESC
+    </select>
+
+    <select id="findMoviesLikeName" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM movie 
+        WHERE movie_cn_name LIKE CONCAT('%', #{keyword}, '%') 
+        AND movie_state = 1
+        ORDER BY movie_releaseDate DESC
+    </select>
+
+    <select id="findMoviesLikeType" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM movie 
+        WHERE movie_type LIKE CONCAT('%', #{movieType}, '%') 
+        AND movie_state = 1
+        ORDER BY movie_releaseDate DESC
+    </select>
+
+    <select id="sortMovieByDate" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM movie 
+        WHERE movie_state = 1
+        ORDER BY movie_releaseDate DESC
+    </select>
+
+    <select id="sortMovieByCount" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM movie 
+        WHERE movie_state = 1
+        ORDER BY movie_commentCount DESC
+    </select>
+
+    <select id="sortMovieByScore" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM movie 
+        WHERE movie_state = 1
+        ORDER BY movie_score DESC
+    </select>
+
+    <select id="sortMovieByBoxOffice" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM movie 
+        WHERE movie_state = 1
+        ORDER BY movie_boxOffice DESC
+    </select>
+
+    <insert id="addMovie" parameterType="com.movie.entity.Movie" useGeneratedKeys="true" keyProperty="movieId">
+        INSERT INTO movie(movie_cn_name, movie_fg_name, movie_actor, movie_director, 
+                          movie_detail, movie_duration, movie_type, movie_score, 
+                          movie_releaseDate, movie_country, movie_picture, movie_state)
+        VALUES(#{movieCnName}, #{movieFgName}, #{movieActor}, #{movieDirector}, 
+               #{movieDetail}, #{movieDuration}, #{movieType}, #{movieScore}, 
+               #{movieReleaseDate}, #{movieCountry}, #{moviePicture}, 1)
+    </insert>
+
+    <update id="updateMovie" parameterType="com.movie.entity.Movie">
+        UPDATE movie
+        <set>
+            <if test="movieCnName != null and movieCnName != ''">
+                movie_cn_name = #{movieCnName},
+            </if>
+            <if test="movieFgName != null and movieFgName != ''">
+                movie_fg_name = #{movieFgName},
+            </if>
+            <if test="movieActor != null and movieActor != ''">
+                movie_actor = #{movieActor},
+            </if>
+            <if test="movieDirector != null and movieDirector != ''">
+                movie_director = #{movieDirector},
+            </if>
+            <if test="movieDetail != null and movieDetail != ''">
+                movie_detail = #{movieDetail},
+            </if>
+            <if test="movieDuration != null and movieDuration != ''">
+                movie_duration = #{movieDuration},
+            </if>
+            <if test="movieType != null and movieType != ''">
+                movie_type = #{movieType},
+            </if>
+            <if test="movieScore != null">
+                movie_score = #{movieScore},
+            </if>
+            <if test="movieReleaseDate != null">
+                movie_releaseDate = #{movieReleaseDate},
+            </if>
+            <if test="movieCountry != null and movieCountry != ''">
+                movie_country = #{movieCountry},
+            </if>
+            <if test="moviePicture != null and moviePicture != ''">
+                movie_picture = #{moviePicture},
+            </if>
+        </set>
+        WHERE movie_id = #{movieId}
+    </update>
+
+    <update id="deleteMovie" parameterType="java.lang.Long">
+        UPDATE movie SET movie_state = 0 WHERE movie_id = #{movieId}
+    </update>
+
+    <update id="changeMovieBoxOffice">
+        UPDATE movie 
+        SET movie_boxOffice = movie_boxOffice + #{movieBoxOffice} 
+        WHERE movie_id = #{movieId}
+    </update>
+
+    <update id="addMovieCommentCount" parameterType="java.lang.Long">
+        UPDATE movie 
+        SET movie_commentCount = movie_commentCount + 1 
+        WHERE movie_id = #{movieId}
+    </update>
+
+    <update id="deleteMovieCommentCount" parameterType="java.lang.Long">
+        UPDATE movie 
+        SET movie_commentCount = movie_commentCount - 1 
+        WHERE movie_id = #{movieId}
+    </update>
+
+</mapper>

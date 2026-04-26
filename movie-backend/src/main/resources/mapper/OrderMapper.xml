@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movie.mapper.OrderMapper">
+
+    <resultMap type="com.movie.entity.Order" id="BaseResultMap">
+        <id property="orderId" column="order_id" javaType="java.lang.String"/>
+        <result property="userId" column="user_id" javaType="java.lang.Long"/>
+        <result property="scheduleId" column="schedule_id" javaType="java.lang.Long"/>
+        <result property="orderPosition" column="order_position" javaType="java.lang.String"/>
+        <result property="orderState" column="order_state" javaType="java.lang.Integer"/>
+        <result property="orderPrice" column="order_price" javaType="java.lang.Integer"/>
+        <result property="orderTime" column="order_time" javaType="java.util.Date"/>
+    </resultMap>
+
+    <select id="findOrderById" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT order_id, user_id, schedule_id, order_position, 
+               order_state, order_price, order_time
+        FROM orderinfo 
+        WHERE order_id = #{orderId}
+    </select>
+
+    <select id="findAllOrders" resultMap="BaseResultMap">
+        SELECT order_id, user_id, schedule_id, order_position, 
+               order_state, order_price, order_time
+        FROM orderinfo
+        ORDER BY order_time DESC
+    </select>
+
+    <select id="findOrdersByScheduleId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT order_id, user_id, schedule_id, order_position, 
+               order_state, order_price, order_time
+        FROM orderinfo 
+        WHERE schedule_id = #{scheduleId} 
+        AND order_state != 2
+        ORDER BY order_time DESC
+    </select>
+
+    <select id="findOrdersByState" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        SELECT order_id, user_id, schedule_id, order_position, 
+               order_state, order_price, order_time
+        FROM orderinfo 
+        WHERE order_state = #{orderState}
+        ORDER BY order_time DESC
+    </select>
+
+    <select id="findOrdersByUserName" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT o.order_id, o.user_id, o.schedule_id, o.order_position, 
+               o.order_state, o.order_price, o.order_time
+        FROM orderinfo o
+        INNER JOIN user u ON o.user_id = u.user_id
+        WHERE u.user_name = #{userName}
+        ORDER BY o.order_time DESC
+    </select>
+
+    <select id="findRefundOrderByUserName" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT o.order_id, o.user_id, o.schedule_id, o.order_position, 
+               o.order_state, o.order_price, o.order_time
+        FROM orderinfo o
+        INNER JOIN user u ON o.user_id = u.user_id
+        WHERE u.user_name = #{userName} 
+        AND o.order_state = 0
+        ORDER BY o.order_time DESC
+    </select>
+
+    <insert id="addOrder" parameterType="com.movie.entity.Order">
+        INSERT INTO orderinfo(order_id, order_position, schedule_id, user_id, order_price, order_time, order_state)
+        VALUES(#{orderId}, #{orderPosition}, #{scheduleId}, #{userId}, #{orderPrice}, #{orderTime}, 1)
+    </insert>
+
+    <update id="updateOrderStateToRefund" parameterType="java.lang.String">
+        UPDATE orderinfo SET order_state = 0 WHERE order_id = #{orderId}
+    </update>
+
+    <update id="updateOrderStateToRefunded" parameterType="java.lang.String">
+        UPDATE orderinfo SET order_state = 2 WHERE order_id = #{orderId}
+    </update>
+
+</mapper>

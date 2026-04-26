@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movie.mapper.HallMapper">
+
+    <resultMap type="com.movie.entity.Hall" id="BaseResultMap">
+        <id property="hallId" column="hall_id" javaType="java.lang.Long"/>
+        <result property="hallName" column="hall_name" javaType="java.lang.String"/>
+        <result property="hallCapacity" column="hall_capacity" javaType="java.lang.Integer"/>
+        <result property="cinemaId" column="cinema_id" javaType="java.lang.Long"/>
+    </resultMap>
+
+    <select id="findHallById" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT hall_id, hall_name, hall_capacity, cinema_id
+        FROM hall 
+        WHERE hall_id = #{hallId}
+    </select>
+
+    <select id="findHallByCinemaId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT hall_id, hall_name, hall_capacity, cinema_id
+        FROM hall 
+        WHERE cinema_id = #{cinemaId}
+        ORDER BY hall_id
+    </select>
+
+    <select id="findHallByCinemaAndHallName" resultMap="BaseResultMap">
+        SELECT h.hall_id, h.hall_name, h.hall_capacity, h.cinema_id
+        FROM hall h
+        INNER JOIN cinema c ON h.cinema_id = c.cinema_id
+        WHERE c.cinema_name = #{cinemaName} 
+        AND h.hall_name = #{hallName}
+    </select>
+
+    <insert id="addHall" parameterType="com.movie.entity.Hall" useGeneratedKeys="true" keyProperty="hallId">
+        INSERT INTO hall(hall_name, hall_capacity, cinema_id)
+        VALUES(#{hallName}, #{hallCapacity}, #{cinemaId})
+    </insert>
+
+    <update id="updateHall" parameterType="com.movie.entity.Hall">
+        UPDATE hall
+        <set>
+            <if test="hallName != null and hallName != ''">
+                hall_name = #{hallName},
+            </if>
+            <if test="hallCapacity != null">
+                hall_capacity = #{hallCapacity},
+            </if>
+            <if test="cinemaId != null">
+                cinema_id = #{cinemaId},
+            </if>
+        </set>
+        WHERE hall_id = #{hallId}
+    </update>
+
+    <delete id="deleteHall" parameterType="java.lang.Long">
+        DELETE FROM hall WHERE hall_id = #{hallId}
+    </delete>
+
+</mapper>

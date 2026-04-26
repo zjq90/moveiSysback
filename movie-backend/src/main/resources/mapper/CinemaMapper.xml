@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movie.mapper.CinemaMapper">
+
+    <resultMap type="com.movie.entity.Cinema" id="BaseResultMap">
+        <id property="cinemaId" column="cinema_id" javaType="java.lang.Long"/>
+        <result property="cinemaName" column="cinema_name" javaType="java.lang.String"/>
+        <result property="cinemaAddress" column="cinema_address" javaType="java.lang.String"/>
+    </resultMap>
+
+    <select id="findCinemaById" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT cinema_id, cinema_name, cinema_address
+        FROM cinema 
+        WHERE cinema_id = #{cinemaId}
+    </select>
+
+    <select id="findCinemaByName" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT cinema_id, cinema_name, cinema_address
+        FROM cinema 
+        WHERE cinema_name = #{cinemaName}
+    </select>
+
+    <select id="findAllCinemas" resultMap="BaseResultMap">
+        SELECT cinema_id, cinema_name, cinema_address
+        FROM cinema
+        ORDER BY cinema_id
+    </select>
+
+    <select id="findCinemasByMovieId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT DISTINCT c.cinema_id, c.cinema_name, c.cinema_address
+        FROM cinema c
+        INNER JOIN hall h ON c.cinema_id = h.cinema_id
+        INNER JOIN schedule s ON h.hall_id = s.hall_id
+        WHERE s.movie_id = #{movieId} 
+        AND s.schedule_state = 1
+        ORDER BY c.cinema_id
+    </select>
+
+    <insert id="addCinema" parameterType="com.movie.entity.Cinema" useGeneratedKeys="true" keyProperty="cinemaId">
+        INSERT INTO cinema(cinema_name, cinema_address)
+        VALUES(#{cinemaName}, #{cinemaAddress})
+    </insert>
+
+    <update id="updateCinema" parameterType="com.movie.entity.Cinema">
+        UPDATE cinema
+        <set>
+            <if test="cinemaName != null and cinemaName != ''">
+                cinema_name = #{cinemaName},
+            </if>
+            <if test="cinemaAddress != null and cinemaAddress != ''">
+                cinema_address = #{cinemaAddress},
+            </if>
+        </set>
+        WHERE cinema_id = #{cinemaId}
+    </update>
+
+    <delete id="deleteCinema" parameterType="java.lang.Long">
+        DELETE FROM cinema WHERE cinema_id = #{cinemaId}
+    </delete>
+
+</mapper>

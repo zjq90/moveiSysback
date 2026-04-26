@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movie.mapper.CommentMapper">
+
+    <resultMap type="com.movie.entity.Comment" id="BaseResultMap">
+        <id property="commentId" column="comment_id" javaType="java.lang.Long"/>
+        <result property="userId" column="user_id" javaType="java.lang.Long"/>
+        <result property="commentContent" column="comment_content" javaType="java.lang.String"/>
+        <result property="movieId" column="movie_id" javaType="java.lang.Long"/>
+        <result property="commentTime" column="comment_time" javaType="java.util.Date"/>
+    </resultMap>
+
+    <select id="findCommentById" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT comment_id, user_id, comment_content, movie_id, comment_time
+        FROM comment 
+        WHERE comment_id = #{commentId}
+    </select>
+
+    <select id="findAllComments" resultMap="BaseResultMap">
+        SELECT comment_id, user_id, comment_content, movie_id, comment_time
+        FROM comment
+        ORDER BY comment_time DESC
+    </select>
+
+    <select id="findCommentsByUserName" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT c.comment_id, c.user_id, c.comment_content, c.movie_id, c.comment_time
+        FROM comment c
+        INNER JOIN user u ON c.user_id = u.user_id
+        WHERE u.user_name = #{userName}
+        ORDER BY c.comment_time DESC
+    </select>
+
+    <select id="findCommentsLikeContent" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT comment_id, user_id, comment_content, movie_id, comment_time
+        FROM comment 
+        WHERE comment_content LIKE CONCAT('%', #{keyword}, '%')
+        ORDER BY comment_time DESC
+    </select>
+
+    <insert id="addComment" parameterType="com.movie.entity.Comment" useGeneratedKeys="true" keyProperty="commentId">
+        INSERT INTO comment(user_id, comment_content, movie_id, comment_time)
+        VALUES(#{userId}, #{commentContent}, #{movieId}, #{commentTime})
+    </insert>
+
+    <update id="updateComment" parameterType="com.movie.entity.Comment">
+        UPDATE comment
+        <set>
+            <if test="commentContent != null and commentContent != ''">
+                comment_content = #{commentContent},
+            </if>
+            <if test="commentTime != null">
+                comment_time = #{commentTime},
+            </if>
+        </set>
+        WHERE comment_id = #{commentId}
+    </update>
+
+    <delete id="deleteComment" parameterType="java.lang.Long">
+        DELETE FROM comment WHERE comment_id = #{commentId}
+    </delete>
+
+</mapper>
